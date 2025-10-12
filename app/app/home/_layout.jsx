@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Colors } from '../../constants/Colors'
-import { useColorScheme } from 'react-native'
+import { useColorScheme, Image } from 'react-native'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useEffect } from 'react'
 
@@ -11,7 +11,6 @@ export default function HomeTabsLayout() {
   const theme = Colors[colorScheme] ?? Colors.light
 
   useEffect(() => {
-    NavigationBar.setBackgroundColorAsync(theme.card)
     NavigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark')
   }, [theme, colorScheme])
 
@@ -38,6 +37,23 @@ export default function HomeTabsLayout() {
         <Tabs.Screen
           name="main"
           options={{ tabBarLabel: 'Головна', headerShown: false }}
+        />
+        <Tabs.Screen
+          name="moodAI"
+          options={{
+            tabBarLabel: 'Mood AI',
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('../../assets/moodAI_logo.png')}
+                style={{ width: size, height: size }}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="analytics"
+          options={{ tabBarLabel: 'Аналітика', headerShown: false }}
         />
         <Tabs.Screen
           name="profile"

@@ -1,13 +1,13 @@
 export const Colors = {
-    primary: "#6883BA",       // Спокійний синьо-лавандовий — асоціюється зі стабільністю настрою
-    secondary: "#8AAEE0",     // М’який блакитний для акцентів
-    accent: "#FFD166",        // Жовтий — позитив / підняття настрою
-    warning: "#CC475A",       // Тривожність / помилки
-    success: "#3BA55D",       // Позитивний настрій, успіх
-    button: "#0D3055FF",      // Основна кнопка (темно-синя)
-    disabled: "#9CA3AF",      // Сірий для неактивних елементів
-    border: "#D0D7E2",        // Нейтральні рамки
-    while: "#FFFFFF",
+    primary: "#6883BA",
+    secondary: "#8AAEE0",
+    accent: "#FFD166",
+    warning: "#CC475A",
+    success: "#3BA55D",
+    button: "#0D3055FF",
+    disabled: "#9CA3AF",
+    border: "#D0D7E2",
+    white: "#FFFFFF",
     shadow: "rgba(0, 0, 0, 0.15)",
 
     light: {
@@ -17,7 +17,8 @@ export const Colors = {
 
         background: "#FFFFFF",
         card: "#FFFFFF",
-        inputBackground: "#FFFFFF",
+        inputBackground: "#F0F0F0",
+        userBubble: "#bbd2edff",
 
         buttonPrimary: "#0D3055FF",
         buttonText: "#FFFFFF",
@@ -39,8 +40,9 @@ export const Colors = {
         background: "#1A1A1A",
         card: "#2B2B2B",
         inputBackground: "#2E2E2E",
+        userBubble: "#0e3561ff",
 
-        buttonPrimary: "#6883BA",
+        buttonPrimary: "#bcccebff",
         buttonText: "#FFFFFF",
         buttonDisabled: "#555B66",
 
@@ -56,9 +58,11 @@ export const Colors = {
         moodPositive: ["#8BC34A", "#A5D66B"],
         moodNeutral: ["#FFCA28", "#FFD166"],
         moodNegative: ["#E53935", "#CC475A"],
+        gradientTextBlue: ["#4A90E2", "#50E3C2"],
+        appPrimary: ['#8A2BE2', '#4169E1'],
     },
 
-    chart: { // Кольори для графіків
+    chart: {
         positive: "#8BC34A",
         neutral: "#FFD166",
         negative: "#CC475A",

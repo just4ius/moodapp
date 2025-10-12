@@ -162,7 +162,11 @@ const StartPage = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontWeight: 'bold', fontSize: 30 },
+  title: {
+    fontWeight: 'bold',
+    // color: Color.gradients.gradientTextBlue,
+    fontSize: 30
+  },
   button: {
     alignItems: 'center',
     justifyContent: 'center',
