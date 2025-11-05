@@ -13,6 +13,7 @@ const ThemedInput = ({ style, ...props }) => {
         style
       ]}
       placeholderTextColor={theme.textSecondary}
+      underlineColorAndroid="transparent"
       {...props}
     />
   )
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 10
   }
 })
 

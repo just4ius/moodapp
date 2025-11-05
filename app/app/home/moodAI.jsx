@@ -284,13 +284,13 @@ function MainScreen() {
   const renderMessage = ({ item }) => {
     const isUser = item.sender === 'user'
     return (
-      <View
+      <ThemedView
         style={[
           styles.messageRow,
           isUser ? styles.userMessageRow : styles.aiMessageRow
         ]}
       >
-        <View
+        <ThemedView
           style={[
             styles.messageBubble,
             {
@@ -307,8 +307,8 @@ function MainScreen() {
           ) : (
             <FormattedMessage text={item.text} style={styles.aiMessageText} />
           )}
-        </View>
-      </View>
+        </ThemedView>
+      </ThemedView>
     )
   }
 
@@ -369,17 +369,21 @@ function MainScreen() {
             value={input}
             onChangeText={setInput}
             multiline
+            underlineColorAndroid="transparent"
           />
         </BlurView>
 
         <TouchableOpacity
           onPress={isLoading ? handleCancelGeneration : handleSendMessage}
+          style={[styles.button, styles.shadow]}
+          activeOpacity={0.8}
+          android_ripple={{ color: 'transparent' }}
         >
           {isLoading ? (
             <BlurView
               intensity={120}
               tint={colorScheme === 'dark' ? 'dark' : 'light'}
-              style={[styles.button, styles.shadow]}
+              style={styles.buttonFill}
             >
               <StopIcon />
             </BlurView>
@@ -388,7 +392,7 @@ function MainScreen() {
               colors={Colors.gradients.appPrimary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={[styles.button, styles.shadow]}
+              style={styles.buttonFill}
             >
               <SendIcon />
             </LinearGradient>
@@ -462,10 +466,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   input: {
     backgroundColor: 'transparent',
+    overflow: 'hidden',
     paddingHorizontal: 15,
     paddingVertical: Platform.OS === 'ios' ? 12 : 10,
     minHeight: 48,
@@ -477,9 +482,13 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden'
+  },
+  buttonFill: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   shadow: {
     shadowColor: '#000',
