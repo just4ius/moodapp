@@ -11,7 +11,43 @@ const RootLayout = () => {
       <StatusBar value="auto" />
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="Home" options={{ headerShown: false }} />
+
+        <Stack.Screen
+          name="Statistics"
+          options={{
+            title: 'Статистика',
+            headerShown: true
+          }}
+        />
+        <Stack.Screen
+          name="Meditation"
+          options={{
+            title: 'Медитація',
+            headerShown: true
+          }}
+        />
+        <Stack.Screen
+          name="Advice"
+          options={{
+            title: 'Поради',
+            headerShown: true
+          }}
+        />
+        <Stack.Screen
+          name="Profile"
+          options={{
+            title: 'Профіль',
+            headerShown: true
+          }}
+        />
+        <Stack.Screen
+          name="Chat"
+          options={{
+            title: 'MoodAI',
+            headerShown: true
+          }}
+        />
       </Stack>
     </>
   )

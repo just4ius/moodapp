@@ -59,7 +59,7 @@ export const Colors = {
         moodNeutral: ["#FFCA28", "#FFD166"],
         moodNegative: ["#E53935", "#CC475A"],
         gradientTextBlue: ["#4A90E2", "#50E3C2"],
-        appPrimary: ['#8A2BE2', '#4169E1'],
+        appPrimary: ['#9132e9', '#4169E1'],
     },
 
     chart: {

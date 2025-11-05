@@ -2,8 +2,8 @@ import React from 'react'
 import { StyleSheet, Pressable, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router'
-import ThemedView from '../../components/ThemedView'
-import ThemedText from '../../components/ThemedText'
+import ThemedView from '../components/ThemedView'
+import ThemedText from '../components/ThemedText'
 
 export default function ProfileTab() {
   const router = useRouter()

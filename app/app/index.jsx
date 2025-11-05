@@ -34,7 +34,7 @@ const StartPage = () => {
       const token = await AsyncStorage.getItem('jwtToken')
       if (token) {
         console.log('JWT вже збережений:', token)
-        router.replace('/home')
+        router.replace('Home')
       }
     }
     checkToken()
@@ -99,7 +99,7 @@ const StartPage = () => {
         console.log('JWT Token:', data.token)
 
         await AsyncStorage.setItem('jwtToken', data.token)
-        router.replace('/home')
+        router.replace('Home')
       } else {
         Alert.alert('Помилка', data.message)
       }

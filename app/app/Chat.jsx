@@ -18,10 +18,10 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets
 } from 'react-native-safe-area-context'
-import { Colors } from '../../constants/Colors'
-import ThemedView from '../../components/ThemedView'
-import ThemedInput from '../../components/ThemedInput'
-import ThemedText from '../../components/ThemedText'
+import { Colors } from '../constants/Colors'
+import ThemedView from '../components/ThemedView'
+import ThemedInput from '../components/ThemedInput'
+import ThemedText from '../components/ThemedText'
 import { LinearGradient } from 'expo-linear-gradient'
 import Svg, { Path, Rect } from 'react-native-svg'
 import MaskedView from '@react-native-masked-view/masked-view'
