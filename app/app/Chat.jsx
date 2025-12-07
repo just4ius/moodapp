@@ -102,7 +102,7 @@ function MainScreen() {
   const colorScheme = useColorScheme()
   const theme = Colors[colorScheme] ?? Colors.light
 
-  const initialBottom = insets.bottom > 0 ? insets.bottom : 10
+  const initialBottom = 70
   const inputContainerBottom = useRef(
     new Animated.Value(initialBottom)
   ).current
@@ -113,7 +113,7 @@ function MainScreen() {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       e => {
-        const keyboardHeight = e.endCoordinates.height - 30
+        const keyboardHeight = e.endCoordinates.height + 70
         Animated.parallel([
           Animated.timing(inputContainerBottom, {
             toValue: keyboardHeight,

@@ -14,10 +14,12 @@ export const Colors = {
         textPrimary: "#1A1A1A",
         textSecondary: "#5A5A5A",
         textMuted: "#8E8E8E",
+        placeholder: "#A0A0A0",
 
         background: "#FFFFFF",
         card: "#FFFFFF",
-        inputBackground: "#F0F0F0",
+        cardBorder: "rgba(0, 0, 0, 0.05)",
+        inputBackground: "#F5F7FA",
         userBubble: "#bbd2edff",
 
         buttonPrimary: "#0D3055FF",
@@ -26,20 +28,19 @@ export const Colors = {
 
         link: "#6883BA",
         linkHover: "#4A6AA8",
-
-        moodPositive: "#A1C45A",
-        moodNeutral: "#FFD166",
-        moodNegative: "#CC475A",
+        tint: "#6883BA",
     },
 
     dark: {
         textPrimary: "#F0F0F0",
         textSecondary: "#C7C7C7",
         textMuted: "#9A9A9A",
+        placeholder: "#666666",
 
-        background: "#1A1A1A",
-        card: "#2B2B2B",
-        inputBackground: "#2E2E2E",
+        background: "#121212",
+        card: "#1E1E1E",
+        cardBorder: "rgba(255, 255, 255, 0.1)",
+        inputBackground: "#2C2C2E",
         userBubble: "#0e3561ff",
 
         buttonPrimary: "#bcccebff",
@@ -48,24 +49,10 @@ export const Colors = {
 
         link: "#8AAEE0",
         linkHover: "#AFC6F0",
-
-        moodPositive: "#A1C45A",
-        moodNeutral: "#FFD166",
-        moodNegative: "#CC475A",
+        tint: "#8AAEE0",
     },
 
     gradients: {
-        moodPositive: ["#8BC34A", "#A5D66B"],
-        moodNeutral: ["#FFCA28", "#FFD166"],
-        moodNegative: ["#E53935", "#CC475A"],
-        gradientTextBlue: ["#4A90E2", "#50E3C2"],
         appPrimary: ['#9132e9', '#4169E1'],
-    },
-
-    chart: {
-        positive: "#8BC34A",
-        neutral: "#FFD166",
-        negative: "#CC475A",
-        background: "#F8F9FC",
     },
 };

@@ -33,21 +33,41 @@ namespace Api.Controllers
                 .Select(m => m.MoodLabel)
                 .ToListAsync();
 
+            string prompt = BuildPrompt(request.CurrentMood, request.Note, history);
+            string advice = await CallOllama(prompt);
+
             var newEntry = new MoodEntry
             {
                 UserId = request.UserId,
                 MoodLabel = request.CurrentMood,
                 Note = request.Note,
+                GeneratedAdvice = advice,
                 CreatedAt = DateTime.UtcNow
             };
             
             _context.Set<MoodEntry>().Add(newEntry);
             await _context.SaveChangesAsync();
 
-            string prompt = BuildPrompt(request.CurrentMood, request.Note, history);
-            string advice = await CallOllama(prompt);
-
             return Ok(new { advice });
+        }
+
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetHistory(int userId)
+        {
+            var entries = await _context.Set<MoodEntry>()
+                .Where(m => m.UserId == userId && m.GeneratedAdvice != null)
+                .OrderByDescending(m => m.CreatedAt)
+                .Select(m => new 
+                {
+                    m.Id,
+                    m.MoodLabel,
+                    m.Note,
+                    Advice = m.GeneratedAdvice,
+                    m.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(entries);
         }
 
         private string BuildPrompt(string currentMood, string? note, List<string> history)
@@ -74,7 +94,7 @@ namespace Api.Controllers
         {
             var payload = new
             {
-                model = "llama3.2",
+                model = "aya-expanse:8b", 
                 prompt = prompt,
                 stream = false
             };

@@ -1,6 +1,9 @@
 using Api.Data;
 using Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +19,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JwtService>();
-
-builder.Services.AddHttpClient();
 builder.Services.AddScoped<OllamaService>();
+builder.Services.AddHttpClient();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -39,7 +57,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowLocalNetwork");
 
-app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

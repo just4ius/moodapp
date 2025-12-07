@@ -19,6 +19,8 @@ namespace Api.Models
 
         public string? Note { get; set; }
 
+        public string? GeneratedAdvice { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

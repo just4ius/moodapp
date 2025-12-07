@@ -9,6 +9,8 @@ namespace Api.Data
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<MoodEntry> MoodEntries { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();

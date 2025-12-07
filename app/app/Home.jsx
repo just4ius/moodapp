@@ -35,7 +35,7 @@ const MOODS = [
   { id: 'angry', label: 'Злий', emoji: '😡' }
 ]
 
-const SkeletonItem = ({ style }) => {
+const SkeletonItem = ({ style, theme }) => {
   const animatedValue = useRef(new Animated.Value(0)).current
 
   React.useEffect(() => {
@@ -63,24 +63,28 @@ const SkeletonItem = ({ style }) => {
   return (
     <Animated.View
       style={[
-        { opacity, backgroundColor: '#CCC', borderRadius: 4 },
+        {
+          opacity,
+          backgroundColor: theme.textMuted,
+          borderRadius: 4
+        },
         style
       ]}
     />
   )
 }
 
-const GradientCard = ({ iconName, text, onPress }) => {
+const GradientCard = ({ iconName, text, onPress, theme, colorScheme }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
       android_ripple={{ color: 'transparent' }}
-      style={[styles.card, styles.shadow]}
+      style={[styles.card, styles.shadow, { borderColor: theme.cardBorder }]}
     >
       <BlurView
         intensity={20}
-        tint="light"
+        tint={colorScheme === 'dark' ? 'dark' : 'light'}
         style={styles.blurContainer}
       >
         <LinearGradient
@@ -105,12 +109,12 @@ const GradientCard = ({ iconName, text, onPress }) => {
 const MoodSelector = ({ selectedMood, onSelect, theme }) => {
   return (
     <View style={styles.moodSelectorWrapper}>
-      <Text style={[styles.sectionTitle, { color: theme.primaryText }]}>
+      <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
         Як ви себе почуваєте?
       </Text>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.moodList}
       >
         {MOODS.map((item) => {
@@ -119,17 +123,26 @@ const MoodSelector = ({ selectedMood, onSelect, theme }) => {
             <TouchableOpacity
               key={item.id}
               onPress={() => onSelect(item.label)}
+              activeOpacity={0.7}
               style={[
                 styles.moodItem,
                 isSelected && styles.moodItemActive,
-                { backgroundColor: isSelected ? theme.tint : theme.inputBackground }
+                {
+                  backgroundColor: isSelected ? theme.tint : theme.inputBackground,
+                  // Додаємо легку рамку для неактивних елементів для контрасту
+                  borderColor: isSelected ? 'transparent' : theme.cardBorder,
+                  borderWidth: 1
+                }
               ]}
             >
               <Text style={styles.moodEmoji}>{item.emoji}</Text>
-              <Text 
+              <Text
                 style={[
-                  styles.moodLabel, 
-                  { color: isSelected ? '#FFF' : theme.secondaryText }
+                  styles.moodLabel,
+                  {
+                    color: isSelected ? '#FFF' : theme.textPrimary,
+                    fontWeight: isSelected ? '700' : '500'
+                  }
                 ]}
               >
                 {item.label}
@@ -160,7 +173,7 @@ function HomeScreen() {
     Keyboard.dismiss()
     setLoadingAdvice(true)
     setAdviceRequested(true)
-    
+
     try {
       const response = await fetch('http://192.168.31.42:5051/api/Advice/generate', {
         method: 'POST',
@@ -168,7 +181,7 @@ function HomeScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 1, 
+          userId: 1,
           currentMood: mood,
           note: moodNote
         })
@@ -182,7 +195,7 @@ function HomeScreen() {
       }
     } catch (error) {
       console.error(error)
-      setAdvice('Спробуйте пізніше.')
+      setAdvice('Не вдалося з\'єднатися з сервером. Перевірте підключення.')
     } finally {
       setLoadingAdvice(false)
     }
@@ -209,7 +222,7 @@ function HomeScreen() {
               { backgroundColor: theme.inputBackground }
             ]}
           >
-            <Feather name="user" size={28} color={theme.primaryText} />
+            <Feather name="user" size={28} color={theme.textPrimary} />
           </TouchableOpacity>
           <Pressable
             onPress={navigateToChat}
@@ -222,58 +235,58 @@ function HomeScreen() {
             <ThemedText
               style={[styles.chatInputPlaceholder, { color: theme.placeholder }]}
             >
-              Чат з психологом...
+              Чат...
             </ThemedText>
           </Pressable>
         </View>
 
-        <MoodSelector 
-          selectedMood={mood} 
-          onSelect={setMood} 
-          theme={theme} 
+        <MoodSelector
+          selectedMood={mood}
+          onSelect={setMood}
+          theme={theme}
         />
 
         <View style={styles.inputSection}>
-            <TextInput
-              style={[
-                styles.noteInput, 
-                { 
-                  backgroundColor: theme.inputBackground, 
-                  color: theme.primaryText,
-                  borderColor: theme.placeholder 
-                }
-              ]}
-              placeholder="Що саме викликало такі емоції? (необов'язково)"
-              placeholderTextColor={theme.placeholder}
-              value={moodNote}
-              onChangeText={setMoodNote}
-              multiline
-              maxLength={200}
-            />
-            
-            <TouchableOpacity 
-              onPress={fetchAdvice}
-              disabled={loadingAdvice}
-              style={[styles.generateButton, styles.shadow]}
+          <TextInput
+            style={[
+              styles.noteInput,
+              {
+                backgroundColor: theme.inputBackground,
+                color: theme.textPrimary,
+                borderColor: theme.cardBorder
+              }
+            ]}
+            placeholder="Що саме викликало такі емоції? (необов'язково)"
+            placeholderTextColor={theme.placeholder}
+            value={moodNote}
+            onChangeText={setMoodNote}
+            multiline
+            maxLength={200}
+          />
+
+          <TouchableOpacity
+            onPress={fetchAdvice}
+            disabled={loadingAdvice}
+            style={[styles.generateButton, styles.shadow]}
+          >
+            <LinearGradient
+              colors={Colors.gradients.appPrimary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.gradientButtonFill}
             >
-                <LinearGradient
-                  colors={Colors.gradients.appPrimary}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.gradientButtonFill}
-                >
-                  <Text style={styles.generateButtonText}>
-                    {loadingAdvice ? 'Аналіз...' : 'Отримати пораду'}
-                  </Text>
-                </LinearGradient>
-            </TouchableOpacity>
+              <Text style={styles.generateButtonText}>
+                {loadingAdvice ? 'Аналіз...' : 'Отримати пораду'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.separatorContainer}>
           <Svg height="20" width={svgWidth}>
             <Path
               d={`M0 10 Q ${svgWidth / 2} 30 ${svgWidth} 10`}
-              stroke={theme.placeholder}
+              stroke={theme.cardBorder}
               strokeWidth="1.5"
               fill="transparent"
             />
@@ -289,19 +302,19 @@ function HomeScreen() {
             ]}
           >
             <ThemedText
-              style={[styles.adviceTitle, { color: theme.secondaryText }]}
+              style={[styles.adviceTitle, { color: theme.textSecondary }]}
             >
               Ваша персональна порада
             </ThemedText>
-            
+
             {loadingAdvice ? (
               <View style={{ marginTop: 10 }}>
-                <SkeletonItem style={{ width: '90%', height: 16, marginBottom: 8 }} />
-                <SkeletonItem style={{ width: '80%', height: 16, marginBottom: 8 }} />
-                <SkeletonItem style={{ width: '40%', height: 16 }} />
+                <SkeletonItem theme={theme} style={{ width: '90%', height: 16, marginBottom: 8 }} />
+                <SkeletonItem theme={theme} style={{ width: '80%', height: 16, marginBottom: 8 }} />
+                <SkeletonItem theme={theme} style={{ width: '40%', height: 16 }} />
               </View>
             ) : (
-              <ThemedText style={[styles.adviceText, { color: theme.primaryText }]}>
+              <ThemedText style={[styles.adviceText, { color: theme.textPrimary }]}>
                 {advice}
               </ThemedText>
             )}
@@ -313,16 +326,22 @@ function HomeScreen() {
             iconName="bar-chart-2"
             text="Статистика"
             onPress={navigateToStats}
+            theme={theme}
+            colorScheme={colorScheme}
           />
           <GradientCard
             iconName="heart"
             text="Медитація"
             onPress={navigateToMeditation}
+            theme={theme}
+            colorScheme={colorScheme}
           />
           <GradientCard
             iconName="info"
             text="Поради"
             onPress={navigateToAdviceList}
+            theme={theme}
+            colorScheme={colorScheme}
           />
         </View>
       </ScrollView>
@@ -343,7 +362,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   scrollContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingBottom: 20
   },
   headerContainer: {
@@ -380,28 +399,38 @@ const styles = StyleSheet.create({
     marginLeft: 5
   },
   moodList: {
-    paddingRight: 20
+    paddingRight: 20,
+    paddingBottom: 10,
+    paddingLeft: 5
   },
+
   moodItem: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 30,
     marginRight: 12,
-    minWidth: 70
   },
   moodItemActive: {
-    transform: [{ scale: 1.05 }]
+    transform: [{ scale: 1.02 }],
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4
   },
   moodEmoji: {
-    fontSize: 28,
-    marginBottom: 5
+    fontSize: 20,
+    marginRight: 10,
+    marginBottom: 0
   },
   moodLabel: {
-    fontSize: 12,
-    fontWeight: '600'
+    fontSize: 15,
+    fontWeight: '500'
   },
+
   inputSection: {
     marginBottom: 10
   },
@@ -457,8 +486,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 20,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)'
+    borderWidth: 1
   },
   blurContainer: {
     width: '100%'
