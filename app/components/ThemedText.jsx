@@ -1,10 +1,8 @@
-import { Text, useColorScheme } from 'react-native'
-import { Colors } from '../constants/Colors'
+import { Text } from 'react-native'
+import { useAppTheme } from '../context/AppContext'
 
 const ThemedText = ({ style, button = false, ...props }) => {
-  const colorScheme = useColorScheme()
-  const theme = Colors[colorScheme] ?? Colors.light
-
+  const { theme } = useAppTheme()
   const textColor = button ? theme.buttonText : theme.textPrimary
 
   return (
@@ -14,5 +12,4 @@ const ThemedText = ({ style, button = false, ...props }) => {
     />
   )
 }
-
 export default ThemedText

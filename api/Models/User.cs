@@ -18,6 +18,9 @@ namespace Api.Models
 
         public bool IsVerified { get; set; } = false;
 
+        [Column(TypeName = "longtext")]
+        public string? ProfilePhoto { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? LastLogin { get; set; }

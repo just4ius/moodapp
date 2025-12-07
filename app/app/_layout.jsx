@@ -1,68 +1,34 @@
 import { StatusBar } from 'expo-status-bar'
-import { StyleSheet, useColorScheme } from 'react-native'
 import { Stack } from 'expo-router'
-import { Colors } from '../constants/Colors'
+import { AppProvider, useAppTheme } from '../context/AppContext'
 
-const RootLayout = () => {
-  const colorScheme = useColorScheme()
-  const theme = Colors[colorScheme] ?? Colors.light
-
+const AppStack = () => {
+  const { theme, themeMode } = useAppTheme()
+  
   return (
     <>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{
-        headerStyle: {
-          backgroundColor: theme.background,
-        },
+        headerStyle: { backgroundColor: theme.background },
         headerTintColor: theme.textPrimary,
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-      >
+        headerTitleStyle: { fontWeight: 'bold' },
+      }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="Home" options={{ headerShown: false }} />
-
-        <Stack.Screen
-          name="Statistics"
-          options={{
-            title: 'Статистика',
-            headerShown: true
-          }}
-        />
-        <Stack.Screen
-          name="Meditation"
-          options={{
-            title: 'Медитація',
-            headerShown: true
-          }}
-        />
-        <Stack.Screen
-          name="Advice"
-          options={{
-            title: 'Поради',
-            headerShown: true
-          }}
-        />
-        <Stack.Screen
-          name="Profile"
-          options={{
-            title: 'Профіль',
-            headerShown: true
-          }}
-        />
-        <Stack.Screen
-          name="Chat"
-          options={{
-            title: 'MoodAI',
-            headerShown: true
-          }}
-        />
+        <Stack.Screen name="Statistics" options={{ title: 'Статистика' }} />
+        <Stack.Screen name="Meditation" options={{ title: 'Медитація' }} />
+        <Stack.Screen name="Advice" options={{ title: 'Поради' }} />
+        <Stack.Screen name="Profile" options={{ title: 'Профіль' }} />
+        <Stack.Screen name="Chat" options={{ title: 'MoodAI' }} />
       </Stack>
     </>
   )
 }
 
-export default RootLayout
-
-const styles = StyleSheet.create({})
+export default function RootLayout() {
+  return (
+    <AppProvider>
+      <AppStack />
+    </AppProvider>
+  )
+}
