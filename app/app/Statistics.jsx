@@ -10,7 +10,6 @@ import {
 } from 'react-native'
 import { Svg, Path, Circle, Line, Text as SvgText } from 'react-native-svg'
 import { Feather } from '@expo/vector-icons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors } from '../constants/Colors'
 import ThemedView from '../components/ThemedView'
 import ThemedText from '../components/ThemedText'
@@ -50,7 +49,40 @@ const MOOD_COLORS = {
   'Злий': '#E53935'
 }
 
-const MoodChart = ({ data, theme }) => {
+const ViewSelector = ({ currentMode, onSelect, theme }) => {
+  const modes = [
+    { key: 'day', label: 'День' },
+    { key: 'week', label: 'Тиждень' },
+    { key: 'month', label: 'Місяць' },
+    { key: 'all', label: 'Все' },
+  ]
+
+  return (
+    <View style={[styles.selectorContainer, { backgroundColor: theme.card }]}>
+      {modes.map((mode) => (
+        <TouchableOpacity
+          key={mode.key}
+          style={[
+            styles.selectorButton,
+            currentMode === mode.key && { backgroundColor: Colors.primary }
+          ]}
+          onPress={() => onSelect(mode.key)}
+        >
+          <ThemedText
+            style={[
+              styles.selectorText,
+              currentMode === mode.key && { color: '#FFF', fontWeight: 'bold' }
+            ]}
+          >
+            {mode.label}
+          </ThemedText>
+        </TouchableOpacity>
+      ))}
+    </View>
+  )
+}
+
+const MoodChart = ({ data, theme, viewMode }) => {
   const padding = 40
   const width = SCREEN_WIDTH - 40
   const height = CHART_HEIGHT
@@ -72,13 +104,22 @@ const MoodChart = ({ data, theme }) => {
     }).join(' ')
   }
 
+  const getLabel = (item) => {
+    if (viewMode === 'day') {
+      const date = new Date(item.timestamp)
+      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+    }
+    const date = new Date(item.date)
+    return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`
+  }
+
   return (
     <View style={[styles.chartContainer, styles.shadow, { backgroundColor: theme.card }]}>
       <ThemedText style={styles.chartTitle}>Динаміка настрою</ThemedText>
       
       {data.length === 0 ? (
         <View style={styles.noDataContainer}>
-           <ThemedText style={{ color: theme.textMuted }}>Немає записів за цей період</ThemedText>
+           <ThemedText style={{ color: theme.textMuted }}>Немає записів</ThemedText>
         </View>
       ) : (
         <Svg width={width} height={height}>
@@ -110,13 +151,25 @@ const MoodChart = ({ data, theme }) => {
               : padding + index * xStep
             const y = height - padding - (item.score * yStep)
             return (
-              <Circle
-                key={index}
-                cx={x}
-                cy={y}
-                r="5"
-                fill={Colors.primary}
-              />
+              <React.Fragment key={index}>
+                <Circle
+                  cx={x}
+                  cy={y}
+                  r="5"
+                  fill={Colors.primary}
+                />
+                {data.length < 10 && (
+                  <SvgText
+                    x={x}
+                    y={height - 10}
+                    fontSize="10"
+                    fill={theme.textMuted}
+                    textAnchor="middle"
+                  >
+                    {getLabel(item)}
+                  </SvgText>
+                )}
+              </React.Fragment>
             )
           })}
         </Svg>
@@ -125,7 +178,7 @@ const MoodChart = ({ data, theme }) => {
   )
 }
 
-const CalendarView = ({ dailyData, currentDate, theme }) => {
+const CalendarView = ({ dailyData, currentDate, theme, onDayPress }) => {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   
@@ -149,11 +202,15 @@ const CalendarView = ({ dailyData, currentDate, theme }) => {
       <ThemedText style={styles.chartTitle}>Календар</ThemedText>
       <View style={styles.calendarGrid}>
         {daysArray.map((day) => (
-          <View key={day} style={styles.dayWrapper}>
+          <TouchableOpacity 
+            key={day} 
+            style={styles.dayWrapper}
+            onPress={() => onDayPress(day)}
+          >
             <View style={[styles.dayCircle, { backgroundColor: getMoodColorForDay(day) }]}>
               <ThemedText style={styles.dayText}>{day}</ThemedText>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
     </View>
@@ -165,19 +222,21 @@ export default function StatisticsScreen() {
   const theme = Colors[colorScheme] ?? Colors.light
   
   const [loading, setLoading] = useState(false)
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentDate, setCurrentDate] = useState(new Date()) 
   const [rawData, setRawData] = useState([])
   
   const [chartData, setChartData] = useState([])
   const [dailyMap, setDailyMap] = useState({})
+  
+  const [viewMode, setViewMode] = useState('month') 
 
   useEffect(() => {
     fetchData()
   }, [])
 
   useEffect(() => {
-    processMoodData(rawData)
-  }, [rawData, currentDate])
+    processData()
+  }, [rawData, currentDate, viewMode])
 
   const fetchData = async () => {
     setLoading(true)
@@ -194,14 +253,54 @@ export default function StatisticsScreen() {
     }
   }
 
-  const processMoodData = (data) => {
-    const currentMonth = currentDate.getMonth()
-    const currentYear = currentDate.getFullYear()
+  const processData = () => {
+    if (!rawData || rawData.length === 0) return
 
-    const filtered = data.filter(item => {
-      const d = new Date(item.createdAt)
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-    })
+    let filtered = []
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth()
+    const currentDay = currentDate.getDate()
+
+    if (viewMode === 'day') {
+      filtered = rawData.filter(item => {
+        const d = new Date(item.createdAt)
+        return d.getFullYear() === currentYear &&
+               d.getMonth() === currentMonth &&
+               d.getDate() === currentDay
+      }).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+
+      const mapped = filtered.map(item => ({
+        score: MOOD_SCORES[item.moodLabel] ?? 4,
+        timestamp: item.createdAt,
+        id: item.id
+      }))
+      setChartData(mapped)
+      updateDailyMap(rawData)
+      return
+    }
+
+    if (viewMode === 'week') {
+      const startOfWeek = new Date(currentDate)
+      const day = startOfWeek.getDay() || 7 
+      if (day !== 1) startOfWeek.setHours(-24 * (day - 1))
+      startOfWeek.setHours(0,0,0,0)
+      
+      const endOfWeek = new Date(startOfWeek)
+      endOfWeek.setDate(startOfWeek.getDate() + 6)
+      endOfWeek.setHours(23,59,59,999)
+
+      filtered = rawData.filter(item => {
+        const d = new Date(item.createdAt)
+        return d >= startOfWeek && d <= endOfWeek
+      })
+    } else if (viewMode === 'month') {
+      filtered = rawData.filter(item => {
+        const d = new Date(item.createdAt)
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+      })
+    } else if (viewMode === 'all') {
+      filtered = [...rawData]
+    }
 
     const groupedByDay = filtered.reduce((acc, curr) => {
       const dateObj = new Date(curr.createdAt)
@@ -223,49 +322,96 @@ export default function StatisticsScreen() {
       return {
         date: dayData.date,
         dateString: dateKey,
-        score: dayData.totalScore / dayData.count 
+        score: dayData.totalScore / dayData.count,
+        timestamp: dayData.date
       }
-    })
+    }).sort((a, b) => a.date - b.date)
 
-    const sortedData = processedArray.sort((a, b) => a.date - b.date)
-
-    const map = {}
-    sortedData.forEach(item => {
-      map[item.dateString] = item
-    })
-    
-    setDailyMap(map)
-    setChartData(sortedData)
+    setChartData(processedArray)
+    updateDailyMap(rawData)
   }
 
-  const changeMonth = (increment) => {
+  const updateDailyMap = (data) => {
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth()
+
+    const filteredForMonth = data.filter(item => {
+      const d = new Date(item.createdAt)
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+    })
+
+    const grouped = filteredForMonth.reduce((acc, curr) => {
+      const dateObj = new Date(curr.createdAt)
+      const dateKey = dateObj.toISOString().split('T')[0]
+      if (!acc[dateKey]) acc[dateKey] = { totalScore: 0, count: 0 }
+      acc[dateKey].totalScore += (MOOD_SCORES[curr.moodLabel] ?? 4)
+      acc[dateKey].count += 1
+      return acc
+    }, {})
+
+    const map = {}
+    Object.keys(grouped).forEach(k => {
+      map[k] = { score: grouped[k].totalScore / grouped[k].count }
+    })
+    setDailyMap(map)
+  }
+
+  const changePeriod = (increment) => {
     const newDate = new Date(currentDate)
-    newDate.setMonth(newDate.getMonth() + increment)
+    if (viewMode === 'day') {
+      newDate.setDate(newDate.getDate() + increment)
+    } else if (viewMode === 'week') {
+      newDate.setDate(newDate.getDate() + (increment * 7))
+    } else if (viewMode === 'month') {
+      newDate.setMonth(newDate.getMonth() + increment)
+    }
     setCurrentDate(newDate)
   }
 
-  const monthNames = [
-    'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
-    'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
-  ]
+  const handleDayPress = (day) => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(day)
+    setCurrentDate(newDate)
+    setViewMode('day')
+  }
+
+  const getHeaderTitle = () => {
+    if (viewMode === 'all') return 'Вся історія'
+    
+    const d = currentDate
+    const mName = [
+      'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+      'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+    ][d.getMonth()]
+
+    if (viewMode === 'day') {
+      return `${d.getDate()} ${mName} ${d.getFullYear()}`
+    }
+    return `${mName} ${d.getFullYear()}`
+  }
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        <View style={styles.headerControl}>
-          <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.arrowBtn}>
-            <Feather name="chevron-left" size={28} color={theme.textPrimary} />
-          </TouchableOpacity>
-          
-          <ThemedText style={styles.monthTitle}>
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </ThemedText>
+        <ViewSelector currentMode={viewMode} onSelect={setViewMode} theme={theme} />
+        <Spacer height={15} />
 
-          <TouchableOpacity onPress={() => changeMonth(1)} style={styles.arrowBtn}>
-            <Feather name="chevron-right" size={28} color={theme.textPrimary} />
-          </TouchableOpacity>
-        </View>
+        {viewMode !== 'all' && (
+          <View style={styles.headerControl}>
+            <TouchableOpacity onPress={() => changePeriod(-1)} style={styles.arrowBtn}>
+              <Feather name="chevron-left" size={28} color={theme.textPrimary} />
+            </TouchableOpacity>
+            
+            <ThemedText style={styles.monthTitle}>
+              {getHeaderTitle()}
+            </ThemedText>
+
+            <TouchableOpacity onPress={() => changePeriod(1)} style={styles.arrowBtn}>
+              <Feather name="chevron-right" size={28} color={theme.textPrimary} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         <Spacer height={20} />
 
@@ -273,12 +419,13 @@ export default function StatisticsScreen() {
           <ActivityIndicator size="large" color={Colors.primary} />
         ) : (
           <>
-            <MoodChart data={chartData} theme={theme} />
+            <MoodChart data={chartData} theme={theme} viewMode={viewMode} />
             <Spacer height={20} />
             <CalendarView 
               dailyData={dailyMap} 
               currentDate={currentDate} 
               theme={theme} 
+              onDayPress={handleDayPress}
             />
           </>
         )}
@@ -295,6 +442,22 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20
+  },
+  selectorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 10
+  },
+  selectorButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 10
+  },
+  selectorText: {
+    fontSize: 14
   },
   headerControl: {
     flexDirection: 'row',

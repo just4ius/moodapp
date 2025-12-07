@@ -7,7 +7,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const systemScheme = useColorScheme();
-  const [themeMode, setThemeMode] = useState('system'); 
+  const [themeMode, setThemeMode] = useState('system');
   const [user, setUser] = useState({ email: '...', name: 'Гість', profilePhoto: null });
   const [isThemeLoading, setIsThemeLoading] = useState(false);
 
@@ -23,25 +23,41 @@ export const AppProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (!token) return;
+      const token = await AsyncStorage.getItem('jwtToken')
 
-      const response = await fetch('http://192.168.31.42:5051/api/User/me', {
+      if (!token) {
+        console.log("Токен відсутній. Перериваємо виконання.")
+        return
+      }
+
+      const url = 'http://192.168.31.42:5051/api/User/me'
+
+      const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      })
+
+      if (response.status === 401) {
+            await AsyncStorage.removeItem('jwtToken')
+            setUser(null)
+            alert("Ваша сесія закінчилась. Будь ласка, увійдіть знову.")
+            return
+        }
 
       if (response.ok) {
-        const data = await response.json();
-        setUser(data);
+        const data = await response.json()
+        setUser(data)
+      } else {
+        const errorText = await response.text()
       }
     } catch (e) {
-      console.error(e);
+      console.error("КРИТИЧНА ПОМИЛКА fetchUserProfile:", e)
+      alert("Помилка оновлення профілю: " + e.message)
     }
-  };
+  }
 
   const updateTheme = async (mode) => {
     setIsThemeLoading(true);
-    
+
     setTimeout(async () => {
       setThemeMode(mode);
       await AsyncStorage.setItem('themeMode', mode);
@@ -76,12 +92,12 @@ export const AppProvider = ({ children }) => {
   const theme = Colors[activeScheme] ?? Colors.light;
 
   return (
-    <AppContext.Provider value={{ 
-      theme, 
-      themeMode, 
-      updateTheme, 
-      user, 
-      fetchUserProfile, 
+    <AppContext.Provider value={{
+      theme,
+      themeMode,
+      updateTheme,
+      user,
+      fetchUserProfile,
       updateUser,
       isThemeLoading
     }}>
