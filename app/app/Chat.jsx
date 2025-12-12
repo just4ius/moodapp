@@ -186,7 +186,7 @@ function MainScreen() {
     setMessages(prev => [...prev, userMessage, aiPlaceholderMessage])
     setIsLoading(true)
 
-    const apiUrl = 'http://192.168.31.42:5051/api/Chat'
+    const apiUrl = 'http://192.168.31.43:5051/api/Chat'
     const xhr = new XMLHttpRequest()
     xhrRef.current = xhr
 

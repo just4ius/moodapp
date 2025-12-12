@@ -66,7 +66,7 @@ const GradientCard = ({ iconName, text, onPress, theme, colorScheme }) => {
 const MoodSelector = ({ selectedMood, onSelect, theme }) => {
   return (
     <View style={styles.moodSelectorWrapper}>
-      <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Як ви себе почуваєте?</Text>
+      <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Як ваш настрій?</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.moodList}>
         {MOODS.map((item) => {
           const isSelected = selectedMood === item.label
@@ -116,7 +116,7 @@ function HomeScreen() {
     setAdviceRequested(true)
 
     try {
-      const response = await fetch('http://192.168.31.42:5051/api/Advice/generate', {
+      const response = await fetch('http://192.168.31.43:5051/api/Advice/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: 1, currentMood: mood, note: moodNote })
