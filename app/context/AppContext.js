@@ -30,7 +30,7 @@ export const AppProvider = ({ children }) => {
         return
       }
 
-      const url = 'http://192.168.31.43:5051/api/User/me'
+      const url = 'http://10.232.16.43:5051/api/User/me'
 
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }

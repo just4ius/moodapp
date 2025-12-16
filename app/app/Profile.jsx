@@ -179,14 +179,14 @@ export default function ProfileScreen() {
             НАЛАШТУВАННЯ
           </ThemedText>
           <View style={[styles.sectionContent, { backgroundColor: theme.card }]}>
-            <ProfileOption 
+            {/* <ProfileOption 
               icon="bell" 
               label="Сповіщення" 
               type="switch"
               value={notificationsEnabled}
               onPress={(val) => setNotificationsEnabled(val)}
               theme={theme}
-            />
+            /> */}
             <View style={[styles.separator, { backgroundColor: theme.inputBackground }]} />
             <ProfileOption 
               icon="moon" 
