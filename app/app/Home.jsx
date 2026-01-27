@@ -116,7 +116,7 @@ function HomeScreen() {
     setAdviceRequested(true)
 
     try {
-      const response = await fetch('http://10.232.16.43:5051/api/Advice/generate', {
+      const response = await fetch('http://192.168.31.43:5051/api/Advice/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: 1, currentMood: mood, note: moodNote })

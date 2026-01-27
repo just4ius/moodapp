@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -17,7 +17,7 @@ import Spacer from '../components/Spacer'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const CHART_HEIGHT = 220
-const API_URL = 'http://10.232.16.43:5051/api/MoodEntries'
+const API_URL = 'http://192.168.31.43:5051/api/MoodEntries'
 
 const MOOD_SCORES = {
   'Чудовий': 6,
@@ -83,11 +83,13 @@ const ViewSelector = ({ currentMode, onSelect, theme }) => {
 }
 
 const MoodChart = ({ data, theme, viewMode }) => {
-  const padding = 40
+  const verticalPadding = 40
+  const rightPadding = 20
+  const leftPadding = 85
   const width = SCREEN_WIDTH - 40
   const height = CHART_HEIGHT
-  const chartWidth = width - padding * 2
-  const chartHeight = height - padding * 2
+  const chartWidth = width - leftPadding - rightPadding
+  const chartHeight = height - verticalPadding * 2
 
   const hasSinglePoint = data.length === 1
   const xStep = hasSinglePoint ? 0 : chartWidth / (data.length - 1)
@@ -97,9 +99,9 @@ const MoodChart = ({ data, theme, viewMode }) => {
   if (data.length > 0) {
     points = data.map((item, index) => {
       const x = hasSinglePoint 
-        ? width / 2 
-        : padding + index * xStep
-      const y = height - padding - (item.score * yStep)
+        ? leftPadding + chartWidth / 2 
+        : leftPadding + index * xStep
+      const y = height - verticalPadding - (item.score * yStep)
       return `${x},${y}`
     }).join(' ')
   }
@@ -123,18 +125,31 @@ const MoodChart = ({ data, theme, viewMode }) => {
         </View>
       ) : (
         <Svg width={width} height={height}>
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Line
-              key={i}
-              x1={padding}
-              y1={height - padding - i * yStep}
-              x2={width - padding}
-              y2={height - padding - i * yStep}
-              stroke={theme.border}
-              strokeDasharray="5, 5"
-              strokeWidth="1"
-            />
-          ))}
+          {Array.from({ length: 7 }).map((_, i) => {
+            const y = height - verticalPadding - i * yStep
+            return (
+              <React.Fragment key={i}>
+                <SvgText
+                    x={leftPadding - 10}
+                    y={y + 4}
+                    fontSize="10"
+                    fill={theme.textMuted}
+                    textAnchor="end"
+                >
+                    {REVERSE_MOOD_SCORES[i]}
+                </SvgText>
+                <Line
+                  x1={leftPadding}
+                  y1={y}
+                  x2={width - rightPadding}
+                  y2={y}
+                  stroke={theme.border}
+                  strokeDasharray="5, 5"
+                  strokeWidth="1"
+                />
+              </React.Fragment>
+            )
+          })}
 
           {data.length > 1 && (
             <Path
@@ -147,9 +162,9 @@ const MoodChart = ({ data, theme, viewMode }) => {
 
           {data.map((item, index) => {
             const x = hasSinglePoint 
-              ? width / 2 
-              : padding + index * xStep
-            const y = height - padding - (item.score * yStep)
+              ? leftPadding + chartWidth / 2 
+              : leftPadding + index * xStep
+            const y = height - verticalPadding - (item.score * yStep)
             return (
               <React.Fragment key={index}>
                 <Circle
