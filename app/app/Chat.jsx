@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import {
   StyleSheet,
   View,
+  Image,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -49,6 +50,8 @@ const StopIcon = ({ color = Colors.primary, size = 24 }) => (
   </Svg>
 )
 
+const CHAT_LOGO = require('../assets/chat_logo.png')
+
 const GradientText = ({ style, children }) => {
   return (
     <MaskedView maskElement={<ThemedText style={style}>{children}</ThemedText>}>
@@ -60,6 +63,45 @@ const GradientText = ({ style, children }) => {
         <ThemedText style={[style, { opacity: 0 }]}>{children}</ThemedText>
       </LinearGradient>
     </MaskedView>
+  )
+}
+
+const ChatLogo = ({ theme, colorScheme, style }) => {
+  return (
+    <View style={[styles.logoContainer, style]}>
+      <View style={styles.logoWrapper}>
+        <Image
+          source={CHAT_LOGO}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+        <MaskedView
+          style={styles.logoFadeMask}
+          maskElement={
+            <LinearGradient
+              colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']}
+              locations={[0.1, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.logoFadeGradient}
+            />
+          }
+        >
+          <BlurView
+            intensity={200}
+            tint={colorScheme === 'dark' ? 'dark' : 'light'}
+            style={styles.logoBlur}
+          />
+          <LinearGradient
+            colors={['rgba(0, 0, 0, 0)', theme.background]}
+            locations={[0, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.logoTint}
+          />
+        </MaskedView>
+      </View>
+    </View>
   )
 }
 
@@ -94,6 +136,7 @@ function MainScreen() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showHero, setShowHero] = useState(true)
   const flatListRef = useRef(null)
   const xhrRef = useRef(null)
   const isCancelled = useRef(false)
@@ -106,9 +149,24 @@ function MainScreen() {
   const inputContainerBottom = useRef(
     new Animated.Value(initialBottom)
   ).current
+
+  // Анімації для клавіатури
   const welcomeTextOpacity = useRef(new Animated.Value(1)).current
   const welcomeTextTranslateY = useRef(new Animated.Value(0)).current
 
+  // Анімації для відправки повідомлення
+  const heroOpacity = useRef(new Animated.Value(1)).current
+  const heroTranslateY = useRef(new Animated.Value(0)).current
+
+  // Комбіновані значення для одночасної роботи обох анімацій
+  const combinedWelcomeOpacity = useRef(
+    Animated.multiply(heroOpacity, welcomeTextOpacity)
+  ).current
+  const combinedWelcomeTranslateY = useRef(
+    Animated.add(heroTranslateY, welcomeTextTranslateY)
+  ).current
+
+  // Ефект для клавіатури
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -166,6 +224,51 @@ function MainScreen() {
     }
   }, [initialBottom])
 
+  // Ефект для приховування/показу пристроїв при наявності повідомлень
+  useEffect(() => {
+    if (messages.length === 0) {
+      if (!showHero) {
+        setShowHero(true)
+      }
+      Animated.parallel([
+        Animated.timing(heroOpacity, {
+          toValue: 1,
+          duration: 350,
+          useNativeDriver: true,
+          easing: Easing.bezier(0.3, 0.28, 0.23, 0.99)
+        }),
+        Animated.timing(heroTranslateY, {
+          toValue: 0,
+          duration: 350,
+          useNativeDriver: true,
+          easing: Easing.bezier(0.3, 0.28, 0.23, 0.99)
+        })
+      ]).start()
+      return
+    }
+
+    if (!showHero) return
+
+    Animated.parallel([
+      Animated.timing(heroOpacity, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+        easing: Easing.bezier(0.3, 0.28, 0.23, 0.99)
+      }),
+      Animated.timing(heroTranslateY, {
+        toValue: -50,
+        duration: 350,
+        useNativeDriver: true,
+        easing: Easing.bezier(0.3, 0.28, 0.23, 0.99)
+      })
+    ]).start(({ finished }) => {
+      if (finished) {
+        setShowHero(false)
+      }
+    })
+  }, [messages.length, showHero, heroOpacity, heroTranslateY])
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) {
       return
@@ -186,7 +289,7 @@ function MainScreen() {
     setMessages(prev => [...prev, userMessage, aiPlaceholderMessage])
     setIsLoading(true)
 
-    const apiUrl = 'http://192.168.31.43:5051/api/Chat'
+    const apiUrl = 'http://192.168.0.124:5051/api/Chat'
     const xhr = new XMLHttpRequest()
     xhrRef.current = xhr
 
@@ -318,13 +421,28 @@ function MainScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        {messages.length === 0 ? (
+        {showHero && (
+          <Animated.View
+            style={{
+              opacity: combinedWelcomeOpacity,
+              transform: [{ translateY: combinedWelcomeTranslateY }]
+            }}
+          >
+            <ChatLogo
+              theme={theme}
+              colorScheme={colorScheme}
+              style={{ paddingTop: Math.max(insets.top, 12) }}
+            />
+          </Animated.View>
+        )}
+
+        {showHero && (
           <Animated.View
             style={[
               styles.welcomeContainer,
               {
-                opacity: welcomeTextOpacity,
-                transform: [{ translateY: welcomeTextTranslateY }]
+                opacity: combinedWelcomeOpacity,
+                transform: [{ translateY: combinedWelcomeTranslateY }]
               }
             ]}
           >
@@ -332,7 +450,9 @@ function MainScreen() {
               Що Вас турбує сьогодні?
             </GradientText>
           </Animated.View>
-        ) : (
+        )}
+
+        {messages.length > 0 && (
           <FlatList
             ref={flatListRef}
             data={messages}
@@ -349,6 +469,7 @@ function MainScreen() {
           />
         )}
       </KeyboardAvoidingView>
+
       <Animated.View
         style={[
           styles.inputContainer,
@@ -419,11 +540,40 @@ const styles = StyleSheet.create({
     flex: 1
   },
   welcomeContainer: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20
   },
+  logoContainer: {
+    alignItems: 'center',
+    paddingBottom: 8
+  },
+  logoWrapper: {
+    width: 160,
+    height: 160,
+    overflow: 'hidden'
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%'
+  },
+  logoFadeMask: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 110
+  },
+  logoFadeGradient: {
+    flex: 1
+  },
+  logoBlur: StyleSheet.absoluteFillObject,
+  logoTint: StyleSheet.absoluteFillObject,
   title: {
     fontWeight: 'bold',
     fontSize: 28,

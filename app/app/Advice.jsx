@@ -17,7 +17,7 @@ export default function AdviceScreen() {
 
   const fetchAdviceHistory = async () => {
     try {
-      const response = await fetch('http://192.168.31.43:5051/api/Advice/history/1');
+      const response = await fetch('http://192.168.0.124:5051/api/Advice/history/1');
       if (response.ok) {
         const data = await response.json();
         setAdviceList(data);

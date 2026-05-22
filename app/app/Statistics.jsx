@@ -17,7 +17,7 @@ import Spacer from '../components/Spacer'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const CHART_HEIGHT = 220
-const API_URL = 'http://192.168.31.43:5051/api/MoodEntries'
+const API_URL = 'http://192.168.0.124:5051/api/MoodEntries'
 
 const MOOD_SCORES = {
   'Чудовий': 6,

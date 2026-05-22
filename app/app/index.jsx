@@ -8,7 +8,7 @@ import ThemedInput from '../components/ThemedInput'
 import Spacer from '../components/Spacer'
 import { Colors } from '../constants/Colors'
 
-const API_URL = 'http://192.168.31.43:5051/api/auth'
+const API_URL = 'http://192.168.0.124:5051/api/auth'
 
 const fetchWithTimeout = async (url, options, timeout = 5000) => {
   return Promise.race([

@@ -22,7 +22,10 @@ public class ChatController : ControllerBase
 
         try
         {
-            await foreach (var chunk in _ollamaService.SendMessageStreamAsync(request.Prompt, HttpContext.RequestAborted))
+            var safetyInstruction = "Якщо питання медичне чи користувачеві щось болить фізично, то порекомендуй користувачеві звернутися до фахівця на початку відповіді.";
+            var fullPrompt = $"{safetyInstruction}\n\n{request.Prompt}";
+
+            await foreach (var chunk in _ollamaService.SendMessageStreamAsync(fullPrompt, HttpContext.RequestAborted))
             {
                 await Response.WriteAsync(JsonSerializer.Serialize(chunk), HttpContext.RequestAborted);
                 await Response.WriteAsync("\n", HttpContext.RequestAborted);

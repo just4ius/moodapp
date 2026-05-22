@@ -73,7 +73,7 @@ namespace Api.Controllers
         private string BuildPrompt(string currentMood, string? note, List<string> history)
         {
             var sb = new StringBuilder();
-            sb.Append("Ти емпатичний психолог. Мова: Українська. ");
+            sb.Append("Ти емпатичний психолог. Мова: Українська.");
             sb.Append($"Користувач відчуває: '{currentMood}'. ");
             
             if (!string.IsNullOrWhiteSpace(note))
