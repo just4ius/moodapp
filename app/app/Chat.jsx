@@ -19,6 +19,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets
 } from 'react-native-safe-area-context'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors } from '../constants/Colors'
 import ThemedView from '../components/ThemedView'
 import ThemedInput from '../components/ThemedInput'
@@ -289,16 +290,26 @@ function MainScreen() {
     setMessages(prev => [...prev, userMessage, aiPlaceholderMessage])
     setIsLoading(true)
 
-    const apiUrl = 'http://192.168.0.124:5051/api/Chat'
-    const xhr = new XMLHttpRequest()
-    xhrRef.current = xhr
+    try {
+      const token = await AsyncStorage.getItem('jwtToken')
+      if (!token) {
+        Alert.alert('Помилка', 'Токен автентифікації не знайдено. Будь ласка, увійдіть заново.')
+        setIsLoading(false)
+        setMessages(prev => prev.filter(msg => msg.id !== aiPlaceholderMessage.id))
+        return
+      }
 
-    let lastResponseLength = 0
-    let accumulatedText = ''
-    let aiMessageId = aiPlaceholderMessage.id
+      const apiUrl = 'http://192.168.31.51:5051/api/Chat'
+      const xhr = new XMLHttpRequest()
+      xhrRef.current = xhr
 
-    xhr.open('POST', apiUrl)
-    xhr.setRequestHeader('Content-Type', 'application/json')
+      let lastResponseLength = 0
+      let accumulatedText = ''
+      let aiMessageId = aiPlaceholderMessage.id
+
+      xhr.open('POST', apiUrl)
+      xhr.setRequestHeader('Content-Type', 'application/json')
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`)
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 3 || xhr.readyState === 4) {
@@ -339,7 +350,14 @@ function MainScreen() {
           if (isCancelled.current) return
 
           console.error('Error:', xhr.responseText)
-          Alert.alert('Помилка', `Не вдалося отримати відповідь: ${xhr.status}`)
+          
+          if (xhr.status === 401) {
+            Alert.alert('Помилка', 'Сесія закінчилась. Будь ласка, увійдіть заново.')
+            AsyncStorage.removeItem('jwtToken')
+          } else {
+            Alert.alert('Помилка', `Не вдалося отримати відповідь: ${xhr.status}`)
+          }
+          
           setMessages(prev =>
             prev.map(msg =>
               msg.id === aiMessageId
@@ -372,6 +390,12 @@ function MainScreen() {
     }
 
     xhr.send(JSON.stringify({ prompt: promptText }))
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error)
+      Alert.alert('Помилка', `Сталася помилка: ${error.message}`)
+      setIsLoading(false)
+      setMessages(prev => prev.filter(msg => msg.id !== aiPlaceholderMessage.id))
+    }
   }
 
   const handleCancelGeneration = () => {

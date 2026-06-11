@@ -30,7 +30,7 @@ export const AppProvider = ({ children }) => {
         return
       }
 
-      const url = 'http://192.168.0.124:5051/api/User/me'
+      const url = 'http://192.168.31.51:5051/api/User/me'
 
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
@@ -68,7 +68,7 @@ export const AppProvider = ({ children }) => {
   const updateUser = async (updatedData) => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
-      const response = await fetch('http://192.168.0.124:5051/api/User/me', {
+      const response = await fetch('http://192.168.31.51:5051/api/User/me', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
